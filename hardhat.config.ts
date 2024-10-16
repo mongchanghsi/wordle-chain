@@ -14,7 +14,6 @@ let PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 
 if (!PRIVATE_KEY) {
   console.log("⚠️ Please set PRIVATE_KEY in the .env file");
-  throw Error();
 }
 
 const config: HardhatUserConfig = {
