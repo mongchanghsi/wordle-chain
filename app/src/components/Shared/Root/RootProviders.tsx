@@ -3,9 +3,9 @@ import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import { PropsWithChildren, useMemo, useEffect, useState } from "react";
 import RootLayout from "./RootLayout";
 import RootBinding from "./RootBinding";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "styled-components";
 import { darkTheme } from "@/theme";
+import CustomPrivyProvider from "@/context/PrivyProvider";
 
 const RootProviders = ({ children }: PropsWithChildren) => {
   const debug = true;
@@ -13,19 +13,11 @@ const RootProviders = ({ children }: PropsWithChildren) => {
     null
   );
 
-  const manifestUrl = useMemo(() => {
-    return new URL("tonconnect-manifest.json", window.location.href).toString();
-  }, []);
-
   useEffect(() => {
     if (debug) {
       import("eruda").then((lib) => lib.default.init());
     }
   }, [debug]);
-
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { refetchOnWindowFocus: false } },
-  });
 
   useEffect(() => {
     const checkIsTelegramApp = async () => {
@@ -103,26 +95,24 @@ const RootProviders = ({ children }: PropsWithChildren) => {
   }
 
   return (
-    <TonConnectUIProvider manifestUrl={manifestUrl}>
+    <CustomPrivyProvider>
       <SDKProvider acceptCustomStyles debug={debug}>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider theme={darkTheme}>
-            <RootLayout>
-              <RootBinding>
-                {isInTelegramWebApp ? (
-                  children
-                ) : (
-                  <div>
-                    This app is designed to run within Telegram. Please open it
-                    in the Telegram app.
-                  </div>
-                )}
-              </RootBinding>
-            </RootLayout>
-          </ThemeProvider>
-        </QueryClientProvider>
+        <ThemeProvider theme={darkTheme}>
+          <RootLayout>
+            <RootBinding>
+              {isInTelegramWebApp ? (
+                children
+              ) : (
+                <div>
+                  This app is designed to run within Telegram. Please open it in
+                  the Telegram app.
+                </div>
+              )}
+            </RootBinding>
+          </RootLayout>
+        </ThemeProvider>
       </SDKProvider>
-    </TonConnectUIProvider>
+    </CustomPrivyProvider>
   );
 };
 

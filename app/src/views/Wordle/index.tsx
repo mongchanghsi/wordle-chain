@@ -9,7 +9,7 @@ const GameWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 100%;
+  // height: 100%;
 `;
 
 const GameContent = styled.div`
@@ -114,7 +114,7 @@ const Wordle = () => {
             submitGuessRef.current = submitFn;
           }}
           onInputValidityChange={handleInputValidityChange}
-          onGameStatusChange={handleGameStatusChange}
+          // onGameStatusChange={handleGameStatusChange}
         />
       </GameContent>
       <ButtonContainer>
