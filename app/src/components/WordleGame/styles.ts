@@ -16,7 +16,7 @@ export const GuessesContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.small};
-  overflow-y: auto;
+  overflow-y: scroll;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   flex-grow: 1;
@@ -24,8 +24,7 @@ export const GuessesContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.small};
 
   /* Ensure at least 2 rows are visible */
-  min-height: calc(2 * (56px + ${({ theme }) => theme.spacing.small}));
-  max-height: calc(5 * (56px + ${({ theme }) => theme.spacing.small}));
+  max-height: calc(5 * (56px + ${({ theme }) => theme.spacing.medium}));
 
   /* WebKit browsers (Chrome, Safari) */
   &::-webkit-scrollbar {

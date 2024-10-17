@@ -1,10 +1,14 @@
 import styled from "styled-components";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import BottomNavigation from "../Navigation/BottomNavigation";
 import TopNavigation from "../Navigation/TopNavigation";
 
 const RootLayoutContainer = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   min-height: 100dvh;
   width: 100%;
   max-width: 480px;
@@ -14,30 +18,56 @@ const RootLayoutContainer = styled.div`
   font-family: ${({ theme }) => theme.fonts.body};
 `;
 
-const Header = styled.header`
-  flex-shrink: 0;
-`;
+const RootLayoutContent = styled.div<{
+  topOffset: number;
+  bottomOffset: number;
+}>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  height: ${({ topOffset, bottomOffset }) =>
+    `calc(100vh - ${topOffset}px - ${bottomOffset}px)`};
+  height: ${({ topOffset, bottomOffset }) => `calc(100dvh - ${topOffset}px )`};
+  padding: ${({ theme }) => theme.spacing.medium};
 
-const Body = styled.main`
-  flex-grow: 1;
-  min-height: 300px;
+  box-sizing: border-box;
   overflow-y: auto;
-  padding: ${({ theme }) => theme.spacing.medium};
-`;
+  overflow-x: hidden;
 
-const Footer = styled.footer`
-  flex-shrink: 0;
-  padding: ${({ theme }) => theme.spacing.medium};
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+
+  /* WebKit browsers (Chrome, Safari) */
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const RootLayout = ({ children }: PropsWithChildren) => {
+  const topNavigationRef = useRef<HTMLDivElement>(null);
+  const [topNavigationOffset, setTopNavigationOffset] = useState<number>(0);
+
+  const bottomNavigationRef = useRef<HTMLDivElement>(null);
+  const [bottomNavigationOffset, setBottomNavigationOffset] =
+    useState<number>(0);
+
+  useEffect(() => {
+    setTopNavigationOffset(topNavigationRef.current?.clientHeight ?? 0);
+    setBottomNavigationOffset(bottomNavigationRef.current?.clientHeight ?? 0);
+  }, [topNavigationRef.current, bottomNavigationRef.current]);
+
   return (
     <RootLayoutContainer>
-      <Header>
-        <TopNavigation />
-      </Header>
-      <Body>{children}</Body>
-      <Footer>{/* Add footer content here if needed */}</Footer>
+      <TopNavigation ref={topNavigationRef} />
+      <RootLayoutContent
+        topOffset={topNavigationOffset}
+        bottomOffset={bottomNavigationOffset}
+      >
+        {children}
+      </RootLayoutContent>
+      {/* <BottomNavigation ref={bottomNavigationRef} /> */}
     </RootLayoutContainer>
   );
 };
