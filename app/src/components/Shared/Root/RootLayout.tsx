@@ -19,6 +19,7 @@ const RootLayoutContainer = styled.div`
 
 const RootLayoutContent = styled.div<{
   topOffset: number;
+  viewportHeight: number;
 }>`
   display: flex;
   flex-direction: column;
@@ -26,7 +27,7 @@ const RootLayoutContent = styled.div<{
   justify-content: flex-start;
   position: relative;
   width: 100%;
-  height: calc(100dvh - ${(props) => props.topOffset}px);
+  height: ${(props) => `${props.viewportHeight - props.topOffset}px`}};
   padding: ${({ theme }) => theme.spacing.small};
   box-sizing: border-box;
   overflow-y: auto;
@@ -43,15 +44,35 @@ const RootLayoutContent = styled.div<{
 const RootLayout = ({ children }: PropsWithChildren) => {
   const topNavigationRef = useRef<HTMLDivElement>(null);
   const [topNavigationOffset, setTopNavigationOffset] = useState<number>(0);
+  const [viewportHeight, setViewportHeight] = useState<number>(
+    window.innerHeight
+  );
 
   useEffect(() => {
     setTopNavigationOffset(topNavigationRef.current?.clientHeight ?? 0);
   }, [topNavigationRef.current]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportHeight(window.visualViewport?.height || window.innerHeight);
+    };
+
+    window.visualViewport?.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.visualViewport?.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
     <RootLayoutContainer>
       <TopNavigation ref={topNavigationRef} />
-      <RootLayoutContent topOffset={topNavigationOffset}>
+      <RootLayoutContent
+        topOffset={topNavigationOffset}
+        viewportHeight={viewportHeight}
+      >
         {children}
       </RootLayoutContent>
     </RootLayoutContainer>

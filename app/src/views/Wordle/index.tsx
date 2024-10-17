@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useRef } from "react";
 import WordleGame from "../../components/WordleGame";
 import styled from "styled-components";
+import { FiRefreshCw, FiSend } from "react-icons/fi";
 
 const GameWrapper = styled.div`
   display: flex;
@@ -22,29 +23,54 @@ const GameContent = styled.div`
 
 const ButtonContainer = styled.div`
   display: flex;
-  gap: ${({ theme }) => theme.spacing.small};
+  gap: ${({ theme }) => theme.spacing.medium};
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
   margin-top: ${({ theme }) => theme.spacing.small};
+  margin-bottom: ${({ theme }) => theme.spacing.small};
   padding: ${({ theme }) => theme.spacing.small};
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
-const Button = styled.button<{ disabled?: boolean }>`
-  flex: 1;
-  padding: ${({ theme }) => `${theme.spacing.small} ${theme.spacing.small}`};
-  background-color: ${({ theme, disabled }) =>
-    disabled ? theme.colors.secondary : theme.colors.primary};
+const ButtonText = styled.span`
   color: ${({ theme }) => theme.colors.text};
-  border: none;
-  border-radius: 4px;
-  font-size: ${({ theme }) => theme.fontSizes.small};
+`;
+
+const Button = styled.button<{
+  variant: "primary" | "secondary";
+  disabled?: boolean;
+}>`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing.small};
+  padding: ${({ theme }) => `${theme.spacing.small} ${theme.spacing.medium}`};
+  background-color: ${({ theme, variant, disabled }) =>
+    disabled
+      ? theme.colors.secondary
+      : variant === "primary"
+        ? theme.colors.primary
+        : theme.colors.background};
+  color: ${({ theme }) => theme.colors.text};
+  border: 2px solid
+    ${({ theme, variant }) =>
+      variant === "primary" ? theme.colors.primary : theme.colors.text};
+  border-radius: 8px;
+  font-size: ${({ theme }) => theme.fontSizes.medium};
+  font-weight: bold;
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-  transition: opacity 0.2s;
+  transition: all 0.2s ease-in-out;
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
 
   &:hover:not(:disabled) {
-    opacity: 0.8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
   }
 `;
 
@@ -80,9 +106,15 @@ const Wordle = () => {
         />
       </GameContent>
       <ButtonContainer>
-        <Button onClick={restartGame}>New Game</Button>
-        <Button onClick={handleSubmit} disabled={!isInputValid}>
-          Submit
+        <Button onClick={restartGame} variant="secondary">
+          <FiRefreshCw /> New Word
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={!isInputValid}
+          variant="primary"
+        >
+          <FiSend /> <ButtonText>Submit</ButtonText>
         </Button>
       </ButtonContainer>
     </GameWrapper>

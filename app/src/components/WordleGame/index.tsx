@@ -6,11 +6,10 @@ import {
   Tile,
   TileInput,
   GameMessage,
-  InputRow,
 } from "./styles";
 
 const WORD_LENGTH = 5;
-const MAX_GUESSES = 6;
+const MAX_GUESSES = 5;
 
 interface WordleGameProps {
   resetGame: () => void;
@@ -126,6 +125,7 @@ const WordleGame: React.FC<WordleGameProps> = ({
     <GameContainer>
       <GuessesContainer>
         {guesses.map((guess) => renderGuess(guess))}
+        {!gameOver && renderInputRow()}
         {[...Array(MAX_GUESSES - guesses.length - 1)].map((_, index) => (
           <GuessRow key={index}>
             {[...Array(WORD_LENGTH)].map((_, i) => (
@@ -134,7 +134,6 @@ const WordleGame: React.FC<WordleGameProps> = ({
           </GuessRow>
         ))}
       </GuessesContainer>
-      {!gameOver && <InputRow>{renderInputRow()}</InputRow>}
       {gameOver && (
         <GameMessage>
           {guesses[guesses.length - 1] === targetWord
