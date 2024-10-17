@@ -16,6 +16,8 @@ const baseTheme = {
         medium: '1rem',
         large: '1.5rem',
         xlarge: '2rem',
+        topNavHeight: '30px',
+        bottomNavHeight: '4rem',
     },
 };
 

@@ -5,9 +5,9 @@ export const GameContainer = styled.div`
   flex-direction: column;
   align-items: center;
   width: 100%;
+  height: 100%;
   max-width: 500px;
   margin: 0 auto;
-  height: 100%;
   font-family: ${({ theme }) => theme.fonts.body};
   color: ${({ theme }) => theme.colors.text};
 `;
@@ -16,16 +16,16 @@ export const GuessesContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.small};
-  overflow-y: scroll;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   flex-grow: 1;
   width: 100%;
   padding: ${({ theme }) => theme.spacing.small};
 
   /* Ensure at least 2 rows are visible */
-  max-height: calc(5 * (56px + ${({ theme }) => theme.spacing.medium}));
-
+  /* max-height: calc(5 * (56px + ${({ theme }) => theme.spacing.medium})); */
+  /* min-height: calc(2 * (56px + ${({ theme }) => theme.spacing.medium})); */
   /* WebKit browsers (Chrome, Safari) */
   &::-webkit-scrollbar {
     display: none;
@@ -39,13 +39,15 @@ export const GuessRow = styled.div`
 `;
 
 export const Tile = styled.div<{ status?: 'correct' | 'present' | 'absent' }>`
-  width: 56px;
-  height: 56px;
+  width: 12vw;
+  height: 12vw;
+  max-width: 56px;
+  max-height: 56px;
   border: 2px solid ${({ theme }) => theme.colors.border};
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: ${({ theme }) => theme.fontSizes.xlarge};
+  font-size: ${({ theme }) => theme.fontSizes.large};
   font-weight: bold;
   text-transform: uppercase;
   transition: all 0.3s ease;
@@ -64,22 +66,12 @@ export const Tile = styled.div<{ status?: 'correct' | 'present' | 'absent' }>`
     }}
 `;
 
-export const TileInput = styled.input`
-  width: 56px;
-  height: 56px;
+export const TileInput = styled(Tile).attrs({ as: 'input' })`
   border: 3px solid ${({ theme }) => theme.colors.primary};
   border-radius: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: ${({ theme }) => theme.fontSizes.xlarge};
-  font-weight: bold;
-  text-transform: uppercase;
   text-align: center;
   background-color: ${({ theme }) => theme.colors.secondary};
-  color: ${({ theme }) => theme.colors.text};
   outline: none;
-  transition: all 0.2s ease;
 
   &:focus {
     border-color: ${({ theme }) => theme.colors.correct};
@@ -91,16 +83,13 @@ export const TileInput = styled.input`
   }
 `;
 
-export const InputRow = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.small};
-  justify-content: center;
-  margin-top: ${({ theme }) => theme.spacing.medium};
+export const InputRow = styled(GuessRow)`
+  margin-top: ${({ theme }) => theme.spacing.small};
 `;
 
 export const GameMessage = styled.div`
-  margin-top: ${({ theme }) => theme.spacing.medium};
-  font-size: ${({ theme }) => theme.fontSizes.large};
+  margin-top: ${({ theme }) => theme.spacing.small};
+  font-size: ${({ theme }) => theme.fontSizes.medium};
   font-weight: bold;
   text-align: center;
   color: ${({ theme }) => theme.colors.text};

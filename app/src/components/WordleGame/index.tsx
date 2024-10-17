@@ -125,7 +125,7 @@ const WordleGame: React.FC<WordleGameProps> = ({
   return (
     <GameContainer>
       <GuessesContainer>
-        {guesses.map((guess, index) => renderGuess(guess))}
+        {guesses.map((guess) => renderGuess(guess))}
         {[...Array(MAX_GUESSES - guesses.length - 1)].map((_, index) => (
           <GuessRow key={index}>
             {[...Array(WORD_LENGTH)].map((_, i) => (

@@ -6,7 +6,10 @@ export const TopNavigationContainer = styled.nav`
   left: 0;
   right: 0;
   z-index: 1;
-  padding: 24px;
+  padding-left: ${({ theme }) => theme.spacing.large};
+  padding-right: ${({ theme }) => theme.spacing.large};
+  padding-top: ${({ theme }) => theme.spacing.medium};
+  padding-bottom: ${({ theme }) => theme.spacing.small};
 
   display: flex;
   align-items: center;

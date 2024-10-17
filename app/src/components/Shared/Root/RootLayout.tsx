@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
-import BottomNavigation from "../Navigation/BottomNavigation";
 import TopNavigation from "../Navigation/TopNavigation";
 
 const RootLayoutContainer = styled.div`
@@ -20,26 +19,22 @@ const RootLayoutContainer = styled.div`
 
 const RootLayoutContent = styled.div<{
   topOffset: number;
-  bottomOffset: number;
 }>`
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   width: 100%;
-  height: ${({ topOffset, bottomOffset }) =>
-    `calc(100vh - ${topOffset}px - ${bottomOffset}px)`};
-  height: ${({ topOffset, bottomOffset }) => `calc(100dvh - ${topOffset}px )`};
-  padding: ${({ theme }) => theme.spacing.medium};
-
+  height: calc(100dvh - ${(props) => props.topOffset}px);
+  padding: ${({ theme }) => theme.spacing.small};
   box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
 
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 
-  /* WebKit browsers (Chrome, Safari) */
   &::-webkit-scrollbar {
     display: none;
   }
@@ -49,25 +44,16 @@ const RootLayout = ({ children }: PropsWithChildren) => {
   const topNavigationRef = useRef<HTMLDivElement>(null);
   const [topNavigationOffset, setTopNavigationOffset] = useState<number>(0);
 
-  const bottomNavigationRef = useRef<HTMLDivElement>(null);
-  const [bottomNavigationOffset, setBottomNavigationOffset] =
-    useState<number>(0);
-
   useEffect(() => {
     setTopNavigationOffset(topNavigationRef.current?.clientHeight ?? 0);
-    setBottomNavigationOffset(bottomNavigationRef.current?.clientHeight ?? 0);
-  }, [topNavigationRef.current, bottomNavigationRef.current]);
+  }, [topNavigationRef.current]);
 
   return (
     <RootLayoutContainer>
       <TopNavigation ref={topNavigationRef} />
-      <RootLayoutContent
-        topOffset={topNavigationOffset}
-        bottomOffset={bottomNavigationOffset}
-      >
+      <RootLayoutContent topOffset={topNavigationOffset}>
         {children}
       </RootLayoutContent>
-      {/* <BottomNavigation ref={bottomNavigationRef} /> */}
     </RootLayoutContainer>
   );
 };
