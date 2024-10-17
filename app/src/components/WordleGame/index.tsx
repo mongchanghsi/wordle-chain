@@ -11,6 +11,8 @@ import {
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 5;
 
+type GameStatus = "playing" | "won" | "lost";
+
 interface WordleGameProps {
   resetGame: () => void;
   onSubmit: (submitFn: () => void) => void;
@@ -27,7 +29,7 @@ const WordleGame: React.FC<WordleGameProps> = ({
   const [currentGuess, setCurrentGuess] = useState<string[]>(
     Array(WORD_LENGTH).fill("")
   );
-  const [gameOver, setGameOver] = useState(false);
+  const [gameStatus, setGameStatus] = useState<GameStatus>("playing");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const initGame = useCallback(() => {
@@ -35,7 +37,7 @@ const WordleGame: React.FC<WordleGameProps> = ({
     setTargetWord(words[Math.floor(Math.random() * words.length)]);
     setGuesses([]);
     setCurrentGuess(Array(WORD_LENGTH).fill(""));
-    setGameOver(false);
+    setGameStatus("playing");
     inputRefs.current[0]?.focus();
   }, []);
 
@@ -74,8 +76,10 @@ const WordleGame: React.FC<WordleGameProps> = ({
     setCurrentGuess(Array(WORD_LENGTH).fill(""));
     onInputValidityChange(false);
 
-    if (guess === targetWord || newGuesses.length === MAX_GUESSES) {
-      setGameOver(true);
+    if (guess === targetWord) {
+      setGameStatus("won");
+    } else if (newGuesses.length === MAX_GUESSES) {
+      setGameStatus("lost");
     } else {
       inputRefs.current[0]?.focus();
     }
@@ -114,7 +118,7 @@ const WordleGame: React.FC<WordleGameProps> = ({
             onKeyDown={(e) => handleKeyDown(e, index)}
             ref={(el) => (inputRefs.current[index] = el)}
             maxLength={1}
-            className={letter === "" ? "pulse" : ""}
+            disabled={gameStatus !== "playing"}
           />
         ))}
       </GuessRow>
@@ -125,8 +129,12 @@ const WordleGame: React.FC<WordleGameProps> = ({
     <GameContainer>
       <GuessesContainer>
         {guesses.map((guess) => renderGuess(guess))}
-        {!gameOver && renderInputRow()}
-        {[...Array(MAX_GUESSES - guesses.length - 1)].map((_, index) => (
+        {gameStatus === "playing" && renderInputRow()}
+        {[
+          ...Array(
+            MAX_GUESSES - guesses.length - (gameStatus === "playing" ? 1 : 0)
+          ),
+        ].map((_, index) => (
           <GuessRow key={index}>
             {[...Array(WORD_LENGTH)].map((_, i) => (
               <Tile key={i} />
@@ -134,10 +142,10 @@ const WordleGame: React.FC<WordleGameProps> = ({
           </GuessRow>
         ))}
       </GuessesContainer>
-      {gameOver && (
+      {gameStatus !== "playing" && (
         <GameMessage>
-          {guesses[guesses.length - 1] === targetWord
-            ? "You won!"
+          {gameStatus === "won"
+            ? "Congratulations! You guessed the word!"
             : `Game over! The word was ${targetWord.toUpperCase()}`}
         </GameMessage>
       )}

@@ -77,10 +77,14 @@ const Button = styled.button<{
 const Wordle = () => {
   const [gameKey, setGameKey] = useState(0);
   const [isInputValid, setIsInputValid] = useState(false);
+  const [gameStatus, setGameStatus] = useState<"playing" | "won" | "lost">(
+    "playing"
+  );
   const submitGuessRef = useRef<() => void>(() => {});
 
   const restartGame = useCallback(() => {
     setGameKey((prevKey) => prevKey + 1);
+    setGameStatus("playing");
   }, []);
 
   const handleSubmit = useCallback(() => {
@@ -93,6 +97,13 @@ const Wordle = () => {
     setIsInputValid(isValid);
   }, []);
 
+  const handleGameStatusChange = useCallback(
+    (status: "playing" | "won" | "lost") => {
+      setGameStatus(status);
+    },
+    []
+  );
+
   return (
     <GameWrapper>
       <GameContent>
@@ -103,6 +114,7 @@ const Wordle = () => {
             submitGuessRef.current = submitFn;
           }}
           onInputValidityChange={handleInputValidityChange}
+          onGameStatusChange={handleGameStatusChange}
         />
       </GameContent>
       <ButtonContainer>
@@ -111,7 +123,7 @@ const Wordle = () => {
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={!isInputValid}
+          disabled={!isInputValid || gameStatus !== "playing"}
           variant="primary"
         >
           <FiSend /> <ButtonText>Submit</ButtonText>
