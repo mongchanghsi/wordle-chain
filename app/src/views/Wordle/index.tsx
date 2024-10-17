@@ -1,54 +1,78 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useRef } from "react";
 import WordleGame from "../../components/WordleGame";
 import styled from "styled-components";
 
-const WordleContainer = styled.div`
+const GameWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 100%;
+  justify-content: space-between;
   height: 100%;
-  padding: ${({ theme }) => theme.spacing.large};
-  background-color: ${({ theme }) => theme.colors.background};
-  color: ${({ theme }) => theme.colors.text};
+  min-height: 300px;
 `;
 
-const Title = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes.xlarge};
-  font-weight: bold;
-  margin-bottom: ${({ theme }) => theme.spacing.medium};
-  color: ${({ theme }) => theme.colors.text};
-`;
-
-const NewGameButton = styled.button`
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing.medium};
+  width: 100%;
+  max-width: 300px;
   margin-top: ${({ theme }) => theme.spacing.medium};
+`;
+
+const Button = styled.button<{ disabled?: boolean }>`
+  flex: 1;
   padding: ${({ theme }) => `${theme.spacing.small} ${theme.spacing.medium}`};
-  background-color: ${({ theme }) => theme.colors.primary};
+  background-color: ${({ theme, disabled }) =>
+    disabled ? theme.colors.secondary : theme.colors.primary};
   color: ${({ theme }) => theme.colors.text};
   border: none;
   border-radius: 4px;
   font-size: ${({ theme }) => theme.fontSizes.medium};
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   transition: opacity 0.2s;
+  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
 
-  &:hover {
+  &:hover:not(:disabled) {
     opacity: 0.8;
   }
 `;
 
 const Wordle = () => {
   const [gameKey, setGameKey] = useState(0);
+  const [isInputValid, setIsInputValid] = useState(false);
+  const submitGuessRef = useRef<() => void>(() => {});
 
   const restartGame = useCallback(() => {
     setGameKey((prevKey) => prevKey + 1);
   }, []);
 
+  const handleSubmit = useCallback(() => {
+    if (isInputValid) {
+      submitGuessRef.current();
+    }
+  }, [isInputValid]);
+
+  const handleInputValidityChange = useCallback((isValid: boolean) => {
+    setIsInputValid(isValid);
+  }, []);
+
   return (
-    <WordleContainer>
-      <WordleGame key={gameKey} resetGame={restartGame} />
-      <NewGameButton onClick={restartGame}>New Game</NewGameButton>
-    </WordleContainer>
+    <GameWrapper>
+      <WordleGame
+        key={gameKey}
+        resetGame={restartGame}
+        onSubmit={(submitFn) => {
+          submitGuessRef.current = submitFn;
+        }}
+        onInputValidityChange={handleInputValidityChange}
+      />
+      <ButtonContainer>
+        <Button onClick={restartGame}>New Game</Button>
+        <Button onClick={handleSubmit} disabled={!isInputValid}>
+          Submit
+        </Button>
+      </ButtonContainer>
+    </GameWrapper>
   );
 };
 

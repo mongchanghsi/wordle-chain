@@ -24,7 +24,6 @@ export const BottomNavigationItem = styled.div`
 
   gap: 12px;
   padding: 12px;
-  padding-bottom: 36px;
 
   ${({ theme }) => css`
     background: ${theme.primary};

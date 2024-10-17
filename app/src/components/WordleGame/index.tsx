@@ -1,84 +1,140 @@
-import React, { useState, useEffect } from "react";
-import { GameContainer, GuessRow, Tile, GameMessage } from "./styles";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import {
+  GameContainer,
+  GuessesContainer,
+  GuessRow,
+  Tile,
+  TileInput,
+  GameMessage,
+  InputRow,
+} from "./styles";
 
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
 
 interface WordleGameProps {
   resetGame: () => void;
+  onSubmit: (submitFn: () => void) => void;
+  onInputValidityChange: (isValid: boolean) => void;
 }
 
-const WordleGame: React.FC<WordleGameProps> = ({ resetGame }) => {
+const WordleGame: React.FC<WordleGameProps> = ({
+  resetGame,
+  onSubmit,
+  onInputValidityChange,
+}) => {
   const [targetWord, setTargetWord] = useState("");
   const [guesses, setGuesses] = useState<string[]>([]);
-  const [currentGuess, setCurrentGuess] = useState("");
+  const [currentGuess, setCurrentGuess] = useState<string[]>(
+    Array(WORD_LENGTH).fill("")
+  );
   const [gameOver, setGameOver] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const initGame = () => {
+  const initGame = useCallback(() => {
     const words = ["react", "state", "props", "hooks", "redux"];
     setTargetWord(words[Math.floor(Math.random() * words.length)]);
     setGuesses([]);
-    setCurrentGuess("");
+    setCurrentGuess(Array(WORD_LENGTH).fill(""));
     setGameOver(false);
-  };
+    inputRefs.current[0]?.focus();
+  }, []);
 
   useEffect(() => {
     initGame();
-  }, [resetGame]);
+  }, [resetGame, initGame]);
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (gameOver) return;
+  const handleInputChange = (index: number, value: string) => {
+    if (value.length > 1) return;
+    const newGuess = [...currentGuess];
+    newGuess[index] = value.toLowerCase();
+    setCurrentGuess(newGuess);
 
-    if (event.key === "Enter" && currentGuess.length === WORD_LENGTH) {
-      const newGuesses = [...guesses, currentGuess];
-      setGuesses(newGuesses);
-      setCurrentGuess("");
+    if (value && index < WORD_LENGTH - 1) {
+      inputRefs.current[index + 1]?.focus();
+    }
 
-      if (currentGuess === targetWord || newGuesses.length === MAX_GUESSES) {
-        setGameOver(true);
-      }
-    } else if (event.key === "Backspace") {
-      setCurrentGuess(currentGuess.slice(0, -1));
-    } else if (
-      currentGuess.length < WORD_LENGTH &&
-      event.key.match(/^[a-z]$/)
+    onInputValidityChange(newGuess.every((letter) => letter !== ""));
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent, index: number) => {
+    if (
+      event.key === "Enter" &&
+      currentGuess.every((letter) => letter !== "")
     ) {
-      setCurrentGuess(currentGuess + event.key);
+      submitGuess();
+    } else if (event.key === "Backspace" && !currentGuess[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
-  const getTileStatus = (letter: string, index: number, isGuessed: boolean) => {
-    if (!isGuessed) return undefined;
+  const submitGuess = useCallback(() => {
+    const guess = currentGuess.join("");
+    const newGuesses = [...guesses, guess];
+    setGuesses(newGuesses);
+    setCurrentGuess(Array(WORD_LENGTH).fill(""));
+    onInputValidityChange(false);
+
+    if (guess === targetWord || newGuesses.length === MAX_GUESSES) {
+      setGameOver(true);
+    } else {
+      inputRefs.current[0]?.focus();
+    }
+  }, [currentGuess, guesses, targetWord, onInputValidityChange]);
+
+  useEffect(() => {
+    onSubmit(submitGuess);
+  }, [onSubmit, submitGuess]);
+
+  const getTileStatus = (letter: string, index: number) => {
     if (letter === targetWord[index]) return "correct";
     if (targetWord.includes(letter)) return "present";
     return "absent";
   };
 
-  const renderGuess = (guess: string, isCurrentGuess: boolean) => {
-    const tiles = [];
-    for (let i = 0; i < WORD_LENGTH; i++) {
-      const letter = guess[i] || "";
-      const status = getTileStatus(letter, i, !isCurrentGuess);
-      tiles.push(
-        <Tile key={i} status={status}>
-          {letter.toUpperCase()}
-        </Tile>
-      );
-    }
-    return <GuessRow>{tiles}</GuessRow>;
+  const renderGuess = (guess: string) => {
+    return (
+      <GuessRow>
+        {guess.split("").map((letter, index) => (
+          <Tile key={index} status={getTileStatus(letter, index)}>
+            {letter.toUpperCase()}
+          </Tile>
+        ))}
+      </GuessRow>
+    );
+  };
+
+  const renderInputRow = () => {
+    return (
+      <GuessRow>
+        {currentGuess.map((letter, index) => (
+          <TileInput
+            key={index}
+            value={letter.toUpperCase()}
+            onChange={(e) => handleInputChange(index, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(e, index)}
+            ref={(el) => (inputRefs.current[index] = el)}
+            maxLength={1}
+            className={letter === "" ? "pulse" : ""}
+          />
+        ))}
+      </GuessRow>
+    );
   };
 
   return (
-    <GameContainer onKeyDown={handleKeyDown} tabIndex={0}>
-      {guesses.map((guess) => renderGuess(guess, false))}
-      {!gameOver && renderGuess(currentGuess, true)}
-      {[...Array(MAX_GUESSES - guesses.length - 1)].map((_, index) => (
-        <GuessRow key={index}>
-          {[...Array(WORD_LENGTH)].map((_, i) => (
-            <Tile key={i} />
-          ))}
-        </GuessRow>
-      ))}
+    <GameContainer>
+      <GuessesContainer>
+        {guesses.map((guess, index) => renderGuess(guess))}
+        {[...Array(MAX_GUESSES - guesses.length - 1)].map((_, index) => (
+          <GuessRow key={index}>
+            {[...Array(WORD_LENGTH)].map((_, i) => (
+              <Tile key={i} />
+            ))}
+          </GuessRow>
+        ))}
+      </GuessesContainer>
+      {!gameOver && <InputRow>{renderInputRow()}</InputRow>}
       {gameOver && (
         <GameMessage>
           {guesses[guesses.length - 1] === targetWord
