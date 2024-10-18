@@ -1,16 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 export const useAsyncInitialize = <T>(
   func: () => Promise<T>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  deps: any[] = []
+  deps: React.DependencyList = []
 ) => {
   const [state, setState] = useState<T | undefined>();
+
+  const memoizedFunc = useCallback(func, deps);
+
   useEffect(() => {
+    let isMounted = true;
     (async () => {
-      setState(await func());
+      const result = await memoizedFunc();
+      if (isMounted) {
+        setState(result);
+      }
     })();
-  }, deps);
+    return () => {
+      isMounted = false;
+    };
+  }, [memoizedFunc]);
 
   return state;
 };

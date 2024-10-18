@@ -5,4 +5,6 @@ const breakpoints = {
   xlarge: `1440px`,
 } as const;
 
-export default { breakpoints };
+const breakpointsModule = { breakpoints };
+
+export default breakpointsModule;

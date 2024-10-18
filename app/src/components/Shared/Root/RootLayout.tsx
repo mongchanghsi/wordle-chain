@@ -27,7 +27,7 @@ const RootLayoutContent = styled.div<{
   justify-content: flex-start;
   position: relative;
   width: 100%;
-  height: ${(props) => `${props.viewportHeight - props.topOffset}px`}};
+  height: ${(props) => `${props.viewportHeight - props.topOffset}px`};
   padding: ${({ theme }) => theme.spacing.small};
   box-sizing: border-box;
   overflow-y: auto;
