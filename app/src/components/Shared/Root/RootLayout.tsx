@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import TopNavigation from "../Navigation/TopNavigation";
+import BottomNavigation from "../Navigation/BottomNavigation";
 
 const RootLayoutContainer = styled.div`
   position: relative;
@@ -19,6 +20,7 @@ const RootLayoutContainer = styled.div`
 
 const RootLayoutContent = styled.div<{
   topOffset: number;
+  bottomOffset: number;
   viewportHeight: number;
 }>`
   display: flex;
@@ -43,14 +45,18 @@ const RootLayoutContent = styled.div<{
 
 const RootLayout = ({ children }: PropsWithChildren) => {
   const topNavigationRef = useRef<HTMLDivElement>(null);
+  const bottomNavigationRef = useRef<HTMLDivElement>(null);
   const [topNavigationOffset, setTopNavigationOffset] = useState<number>(0);
+  const [bottomNavigationOffset, setBottomNavigationOffset] =
+    useState<number>(0);
   const [viewportHeight, setViewportHeight] = useState<number>(
     window.innerHeight
   );
 
   useEffect(() => {
     setTopNavigationOffset(topNavigationRef.current?.clientHeight ?? 0);
-  }, [topNavigationRef.current]);
+    setBottomNavigationOffset(bottomNavigationRef.current?.clientHeight ?? 0);
+  }, [topNavigationRef.current, bottomNavigationRef.current]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -69,8 +75,10 @@ const RootLayout = ({ children }: PropsWithChildren) => {
   return (
     <RootLayoutContainer>
       <TopNavigation ref={topNavigationRef} />
+      <BottomNavigation ref={bottomNavigationRef} />
       <RootLayoutContent
         topOffset={topNavigationOffset}
+        bottomOffset={bottomNavigationOffset}
         viewportHeight={viewportHeight}
       >
         {children}
