@@ -8,13 +8,12 @@ import {
   GameMessage,
 } from "./styles";
 import { generateWordHash, getWord } from "@/utils/word-rng";
-import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { useAccount } from "wagmi";
+import { useSmartWalletClient } from "@/hooks/smartWallet/useSmartWalletClient";
+import { wordleV2Abi, wordleV2Address } from "@/generated";
 
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 5;
-
-// TODO: Contract Address
-const CONTRACT_ADDRESS = "0xXXX";
 
 type GameStatus = "playing" | "won" | "lost";
 
@@ -30,8 +29,7 @@ const WordleGame: React.FC<WordleGameProps> = ({
   onInputValidityChange,
 }) => {
   const { address } = useAccount();
-  const publicClient = usePublicClient();
-  const { data: walletClient } = useWalletClient();
+  const { smartAccountClient } = useSmartWalletClient();
 
   const [targetWord, setTargetWord] = useState("");
   const [guesses, setGuesses] = useState<string[]>([]);
@@ -44,35 +42,42 @@ const WordleGame: React.FC<WordleGameProps> = ({
   const initGame = useCallback(async () => {
     try {
       const word = getWord();
-      const { messageHash, wordHash, letterCodes, salt } =
-        generateWordHash(word);
-      const signature = await walletClient?.signMessage({
-        message: {
-          raw: messageHash,
-        },
+      const { wordHash, letterCodes, salt, signature } =
+        await generateWordHash(word);
+
+      // Setup the aa transaction
+      if (!address || !smartAccountClient) {
+        return;
+      }
+
+      const userOperation = await smartAccountClient.sendUserOperation({
+        calls: [
+          {
+            to: wordleV2Address,
+            abi: wordleV2Abi,
+            functionName: "startNewGame",
+            args: [wordHash, letterCodes, salt, signature],
+          },
+        ],
       });
-      if (!signature) return;
-      const { request } = await publicClient!.simulateContract({
-        account: address,
-        address: CONTRACT_ADDRESS,
-        abi: "" as any, // TODO: Add ABI
-        functionName: "startGame",
-        args: [wordHash, letterCodes, salt, signature],
+
+      const tx = await smartAccountClient.waitForUserOperationReceipt({
+        hash: userOperation,
       });
-      const tx = await walletClient?.writeContract(request);
+
+      console.log("initGame | Transaction Hash:", tx.receipt);
 
       if (tx) {
         setTargetWord(word);
         setGuesses([]);
         setCurrentGuess(Array(WORD_LENGTH).fill(""));
-
         setGameStatus("playing");
         inputRefs.current[0]?.focus();
       }
     } catch (error) {
-      console.log("initGame | Error - ", error);
+      console.error("initGame | Error - ", error);
     }
-  }, []);
+  }, [address, smartAccountClient]);
 
   useEffect(() => {
     initGame();
@@ -104,29 +109,53 @@ const WordleGame: React.FC<WordleGameProps> = ({
 
   const submitGuess = useCallback(async () => {
     const guess = currentGuess.join("");
-    // TODO: Send guess to makeGuess
-    const { request } = await publicClient!.simulateContract({
-      account: address,
-      address: CONTRACT_ADDRESS,
-      abi: "" as any, // TODO: Add ABI
-      functionName: "makeGuess",
-      args: [guess],
-    });
-    const tx = await walletClient?.writeContract(request);
+    try {
+      if (!address || !smartAccountClient) {
+        return;
+      }
 
-    const newGuesses = [...guesses, guess];
-    setGuesses(newGuesses);
-    setCurrentGuess(Array(WORD_LENGTH).fill(""));
-    onInputValidityChange(false);
+      const userOperation = await smartAccountClient.sendUserOperation({
+        calls: [
+          {
+            to: wordleV2Address,
+            abi: wordleV2Abi,
+            functionName: "makeGuess",
+            args: [guess],
+          },
+        ],
+      });
 
-    if (guess === targetWord) {
-      setGameStatus("won");
-    } else if (newGuesses.length === MAX_GUESSES) {
-      setGameStatus("lost");
-    } else {
-      inputRefs.current[0]?.focus();
+      const tx = await smartAccountClient.waitForUserOperationReceipt({
+        hash: userOperation,
+      });
+
+      console.log("submitGuess | Transaction Hash:", tx.receipt);
+
+      if (tx) {
+        const newGuesses = [...guesses, guess];
+        setGuesses(newGuesses);
+        setCurrentGuess(Array(WORD_LENGTH).fill(""));
+        onInputValidityChange(false);
+
+        if (guess === targetWord) {
+          setGameStatus("won");
+        } else if (newGuesses.length === MAX_GUESSES) {
+          setGameStatus("lost");
+        } else {
+          inputRefs.current[0]?.focus();
+        }
+      }
+    } catch (error) {
+      console.error("submitGuess | Error - ", error);
     }
-  }, [currentGuess, guesses, targetWord, onInputValidityChange]);
+  }, [
+    currentGuess,
+    guesses,
+    targetWord,
+    onInputValidityChange,
+    address,
+    smartAccountClient,
+  ]);
 
   useEffect(() => {
     onSubmit(submitGuess);
@@ -159,7 +188,9 @@ const WordleGame: React.FC<WordleGameProps> = ({
             value={letter.toUpperCase()}
             onChange={(e) => handleInputChange(index, e.target.value)}
             onKeyDown={(e) => handleKeyDown(e, index)}
-            ref={(el) => (inputRefs.current[index] = el)}
+            ref={(el) => {
+              inputRefs.current[index] = el;
+            }}
             maxLength={1}
             disabled={gameStatus !== "playing"}
           />

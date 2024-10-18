@@ -5,14 +5,14 @@ import ENVIRONMENT from "@/configuration/environment";
 import { PrivyProvider } from "@privy-io/react-auth";
 
 import { createConfig } from "@privy-io/wagmi";
-import { sepolia } from "viem/chains";
+import { baseSepolia } from "viem/chains";
 import { http } from "wagmi";
 import { WagmiProvider } from "@privy-io/wagmi";
 
 const config = createConfig({
-  chains: [sepolia],
+  chains: [baseSepolia],
   transports: {
-    [sepolia.id]: http(),
+    [baseSepolia.id]: http(),
   },
 });
 
@@ -34,6 +34,11 @@ export default function CustomPrivyProvider({
           accentColor: "#676FFF",
           logo: "https://your-logo-url",
         },
+        embeddedWallets: {
+          createOnLogin: "all-users",
+        },
+        defaultChain: baseSepolia,
+        supportedChains: [baseSepolia],
         // embeddedWallets: {
         //   createOnLogin: "users-without-wallets",
         // },

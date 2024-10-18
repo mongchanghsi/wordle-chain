@@ -1,6 +1,6 @@
 import { SDKProvider, mockTelegramEnv, isTMA } from "@telegram-apps/sdk-react";
-import { TonConnectUIProvider } from "@tonconnect/ui-react";
-import { PropsWithChildren, useMemo, useEffect, useState } from "react";
+// import { TonConnectUIProvider } from "@tonconnect/ui-react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import RootLayout from "./RootLayout";
 import RootBinding from "./RootBinding";
 import { ThemeProvider } from "styled-components";

@@ -97,13 +97,6 @@ const Wordle = () => {
     setIsInputValid(isValid);
   }, []);
 
-  const handleGameStatusChange = useCallback(
-    (status: "playing" | "won" | "lost") => {
-      setGameStatus(status);
-    },
-    []
-  );
-
   return (
     <GameWrapper>
       <GameContent>

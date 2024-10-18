@@ -1,12 +1,18 @@
 import { keccak256, toBytes, encodePacked, Hex } from "viem";
 import { randomBytes } from "crypto";
+import { privateKeyToAccount } from "viem/accounts";
 
 export const getWord = () => {
   const words = ["react", "state", "props", "hooks", "redux"];
   return words[Math.floor(Math.random() * words.length)];
 };
 
-export const generateWordHash = (word: string) => {
+export const generateWordHash = async (word: string) => {
+
+  // Replace with your actual private key
+  const PRIVATE_KEY: Hex = '0xb91ceb667efc4610874220a9aee36bf5375d688ea68b2ad7e4e14f3b4c86a5d3'
+  const account = privateKeyToAccount(PRIVATE_KEY)
+
   if (word.length !== 5) throw new Error("Word must be exactly 5 letters long");
   const salt = `0x${randomBytes(32).toString("hex")}` as Hex;
   const wordHash = keccak256(toBytes(word));
@@ -32,10 +38,15 @@ export const generateWordHash = (word: string) => {
     )
   );
 
+  // Sign the message
+  const signature = await account.signMessage({
+    message: { raw: messageHash },
+  })
+
   return {
-    messageHash,
     wordHash,
     letterCodes,
     salt,
+    signature
   };
 };
