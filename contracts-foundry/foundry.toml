@@ -1,6 +1,11 @@
 [profile.default]
 src = 'src'
-out = "out"
+out = 'out'
 libs = ["lib"]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+[rpc_endpoints]
+base_sepolia = "https://sepolia.base.org"
+
+[etherscan]
+base_sepolia = { key = "BBYZV9G5FAG8R5EVFVHIA2QN2RVRK15U4B" }
