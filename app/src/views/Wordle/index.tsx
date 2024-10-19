@@ -2,6 +2,7 @@ import React, { useCallback, useState, useRef } from "react";
 import WordleGame from "../../components/WordleGame";
 import styled from "styled-components";
 import { FiRefreshCw, FiSend } from "react-icons/fi";
+import Button from "@/components/Shared/Button";
 
 const GameWrapper = styled.div`
   display: flex;
@@ -9,7 +10,6 @@ const GameWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  // height: 100%;
 `;
 
 const GameContent = styled.div`
@@ -21,7 +21,7 @@ const GameContent = styled.div`
   align-items: center;
 `;
 
-const ButtonContainer = styled.div`
+const GameActionContainer = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.spacing.medium};
   width: 100%;
@@ -30,48 +30,6 @@ const ButtonContainer = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.small};
   padding: ${({ theme }) => theme.spacing.small};
   background-color: ${({ theme }) => theme.colors.background};
-`;
-
-const ButtonText = styled.span`
-  color: ${({ theme }) => theme.colors.text};
-`;
-
-const Button = styled.button<{
-  variant: "primary" | "secondary";
-  disabled?: boolean;
-}>`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${({ theme }) => theme.spacing.small};
-  padding: ${({ theme }) => `${theme.spacing.small} ${theme.spacing.medium}`};
-  background-color: ${({ theme, variant, disabled }) =>
-    disabled
-      ? theme.colors.secondary
-      : variant === "primary"
-        ? theme.colors.primary
-        : theme.colors.background};
-  color: ${({ theme }) => theme.colors.text};
-  border: 2px solid
-    ${({ theme, variant }) =>
-      variant === "primary" ? theme.colors.primary : theme.colors.text};
-  border-radius: 8px;
-  font-size: ${({ theme }) => theme.fontSizes.medium};
-  font-weight: bold;
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-  transition: all 0.2s ease-in-out;
-  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: none;
-  }
 `;
 
 const Wordle = () => {
@@ -107,21 +65,23 @@ const Wordle = () => {
             submitGuessRef.current = submitFn;
           }}
           onInputValidityChange={handleInputValidityChange}
-          // onGameStatusChange={handleGameStatusChange}
         />
       </GameContent>
-      <ButtonContainer>
-        <Button onClick={restartGame} variant="secondary">
-          <FiRefreshCw /> New Word
-        </Button>
+      <GameActionContainer>
+        <Button
+          onClick={restartGame}
+          variant="secondary"
+          label="New Word"
+          startIcon={<FiRefreshCw />}
+        ></Button>
         <Button
           onClick={handleSubmit}
           disabled={!isInputValid || gameStatus !== "playing"}
           variant="primary"
-        >
-          <FiSend /> <ButtonText>Submit</ButtonText>
-        </Button>
-      </ButtonContainer>
+          label="Submit"
+          startIcon={<FiSend />}
+        ></Button>
+      </GameActionContainer>
     </GameWrapper>
   );
 };
