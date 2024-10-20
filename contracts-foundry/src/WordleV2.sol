@@ -3,8 +3,8 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-
-contract OnChainWordle {
+import "forge-std/console.sol";
+contract WordleV2 {
     using ECDSA for bytes32;
 
     struct Game {
@@ -15,11 +15,20 @@ contract OnChainWordle {
         bytes32 salt;
     }
 
+    struct Leaderboard {
+        address player;
+        uint256 correctGuesses;
+    }
+
+    Leaderboard[] public topFive;
+    mapping(address => uint256) public scores;
+
     mapping(address => Game) public games;
     uint8 public constant MAX_ATTEMPTS = 5;
     uint8 public constant WORD_LENGTH = 5;
 
     address public authorityAddress;
+
 
     event GameStarted(address player);
     event GuessResult(address player, string guess, string result);
@@ -75,9 +84,9 @@ contract OnChainWordle {
         bytes32 guessHash = keccak256(abi.encodePacked(_guess));
         string memory result = checkGuess(_guess, game.letterCodes, game.salt);
         emit GuessResult(msg.sender, _guess, result);
-
         if (guessHash == game.wordHash) {
             game.completed = true;
+            updateLeaderboard(msg.sender, ++scores[msg.sender]);
             emit GameWon(msg.sender);
         } else if (game.attemptsLeft == 0) {
             game.completed = true;
@@ -137,4 +146,56 @@ contract OnChainWordle {
     function getGame(address player) public view returns (Game memory) {
         return games[player];
     }
+
+    function updateLeaderboard(address player, uint256 score) internal {
+        console.log("Updating leaderboard");
+        // Check if the player is already in the leaderboard
+        for (uint256 i = 0; i < topFive.length; i++) {
+            if (topFive[i].player == player) {
+                // Update existing entry if the new score is better
+                if (score > topFive[i].correctGuesses) {
+                    topFive[i].correctGuesses = score;
+                    sortLeaderboard();
+                }
+                return;
+            }
+        }
+
+        // If the leaderboard is not full, add the new player
+        if (topFive.length < 5) {
+            topFive.push(Leaderboard(player, score));
+        } else if (score > topFive[4].correctGuesses) {
+            // Replace the last entry if the new score is higher
+            topFive[4] = Leaderboard(player, score);
+        } else {
+            // Score is not high enough to enter the leaderboard
+            return;
+        }
+
+        sortLeaderboard();
+    }
+
+    function sortLeaderboard() internal {
+        uint256 n = topFive.length;
+        for (uint256 i = 0; i < n - 1; i++) {
+            for (uint256 j = 0; j < n - i - 1; j++) {
+                if (topFive[j].correctGuesses < topFive[j + 1].correctGuesses) {
+                    // Swap entries
+                    Leaderboard memory temp = topFive[j];
+                    topFive[j] = topFive[j + 1];
+                    topFive[j + 1] = temp;
+                }
+            }
+        }
+    }
+
+    // Add this function to safely get leaderboard entries
+    function getLeaderboardEntry(uint256 index) public view returns (address player, uint256 score) {
+        require(index < topFive.length, "Index out of bounds");
+        return (topFive[index].player, topFive[index].correctGuesses);
+    }
+
+    function getLeaderboardSize() public view returns (uint256) {
+    return topFive.length;
+}
 }

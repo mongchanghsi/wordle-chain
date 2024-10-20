@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../src/WordleV2.sol";
 
 contract WordleV2Test is Test {
-    OnChainWordle public wordle;
+    WordleV2 public wordle;
     address public constant AUTHORITY_ADDRESS =
         address(0x8eDD0168dcE334BA10591f44470Cca1F03b8dEBF);
     address public player = address(0x8eDD0168dcE334BA10591f44470Cca1F03b8dEBF);
@@ -34,9 +34,11 @@ contract WordleV2Test is Test {
     bytes public constant SIGNATURE =
         hex"226d0e7901b576e0adcf796b5c82d82647cd6b4691c29fb955a3c4aed0eb469b264f78e1a73a7021a82dc4709a6cb4a0abb5ee00fa28c91245e8d9023f23441e1b";
 
+    uint8 public constant MAX_ATTEMPTS = 5;
+
     function setUp() public {
         vm.prank(AUTHORITY_ADDRESS);
-        wordle = new OnChainWordle(AUTHORITY_ADDRESS);
+        wordle = new WordleV2(AUTHORITY_ADDRESS);
         vm.deal(player, 1 ether);
 
         // Print out the authority address
@@ -47,7 +49,7 @@ contract WordleV2Test is Test {
         vm.prank(player);
         wordle.startNewGame(WORD_HASH, LETTER_CODES, SALT, SIGNATURE);
 
-        OnChainWordle.Game memory game = wordle.getGame(player);
+        WordleV2.Game memory game = wordle.getGame(player);
         assertEq(game.wordHash, WORD_HASH);
         assertEq(game.attemptsLeft, 5);
         assertFalse(game.completed);
@@ -76,7 +78,7 @@ contract WordleV2Test is Test {
         vm.prank(player);
         wordle.makeGuess("wrong"); // Change this to a wrong guess
 
-        OnChainWordle.Game memory game = wordle.getGame(player);
+        WordleV2.Game memory game = wordle.getGame(player);
         assertEq(game.attemptsLeft, 4);
         assertFalse(game.completed);
     }
@@ -94,11 +96,11 @@ contract WordleV2Test is Test {
         );
 
         vm.expectEmit(true, false, false, false);
-        emit OnChainWordle.GameWon(player);
+        emit WordleV2.GameWon(player);
         vm.prank(player);
         wordle.makeGuess("hello");
 
-        OnChainWordle.Game memory game = wordle.getGame(player);
+        WordleV2.Game memory game = wordle.getGame(player);
         assertTrue(game.completed);
     }
 
@@ -112,11 +114,11 @@ contract WordleV2Test is Test {
         }
 
         vm.expectEmit(true, false, false, false);
-        emit OnChainWordle.GameLost(player);
+        emit WordleV2.GameLost(player);
         vm.prank(player);
         wordle.makeGuess("wrong");
 
-        OnChainWordle.Game memory game = wordle.getGame(player);
+        WordleV2.Game memory game = wordle.getGame(player);
         assertEq(game.attemptsLeft, 0);
         assertTrue(game.completed);
     }
@@ -151,4 +153,84 @@ contract WordleV2Test is Test {
         vm.prank(player);
         wordle.makeGuess("hello");
     }
+
+  function testUpdateLeaderboard() public {
+    // Setup
+    address player1 = address(1);
+    address player2 = address(2);
+    address player3 = address(3);
+    address player4 = address(4);
+    address player5 = address(5);
+    
+    // Play games with different scores
+    playMultipleGames(player1, 5); // 5 wins
+    playMultipleGames(player2, 4); // 4 wins
+    playMultipleGames(player3, 3); // 3 wins
+    playMultipleGames(player4, 2); // 2 wins
+    playMultipleGames(player5, 1); // 1 win
+
+    // Debug: Print the number of entries in the leaderboard
+    uint256 leaderboardSize = wordle.getLeaderboardSize();
+    console.log("Leaderboard size:", leaderboardSize);
+
+    // Check leaderboard
+    for (uint i = 0; i < leaderboardSize; i++) {
+        (address addr, uint256 score) = wordle.getLeaderboardEntry(i);
+    }
+
+    // Assertions
+    require(leaderboardSize == 5, "Leaderboard should have 5 entries");
+
+    (address addr, uint256 score) = wordle.getLeaderboardEntry(0);
+    assertEq(addr, player1);
+    assertEq(score, 5);
+
+    (addr, score) = wordle.getLeaderboardEntry(1);
+    assertEq(addr, player2);
+    assertEq(score, 4);
+
+    (addr, score) = wordle.getLeaderboardEntry(2);
+    assertEq(addr, player3);
+    assertEq(score, 3);
+
+    (addr, score) = wordle.getLeaderboardEntry(3);
+    assertEq(addr, player4);
+    assertEq(score, 2);
+
+    (addr, score) = wordle.getLeaderboardEntry(4);
+    assertEq(addr, player5);
+    assertEq(score, 1);
+
+    // Play additional games to test updating existing scores
+    playMultipleGames(player3, 3); // Total 6 wins, should move to top
+
+    // Check updated leaderboard
+    (addr, score) = wordle.getLeaderboardEntry(0);
+    assertEq(addr, player3);
+    assertEq(score, 6);
+
+    (addr, score) = wordle.getLeaderboardEntry(1);
+    assertEq(addr, player1);
+    assertEq(score, 5);
+}
+
+function playMultipleGames(address player, uint8 wins) internal {
+    for (uint8 i = 0; i < wins; i++) {
+        playAndWin(player);
+    }
+}
+
+function playAndWin(address player) internal {
+    vm.prank(player);
+     wordle.startNewGame(WORD_HASH, LETTER_CODES, SALT, SIGNATURE);
+    
+    vm.prank(player);
+    wordle.makeGuess("hello");
+
+    // Debug: Print game status after winning
+    WordleV2.Game memory game = wordle.getGame(player);
+    console.log("Game completed for player:", player, game.completed);
+}
+
+ 
 }

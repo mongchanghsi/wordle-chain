@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "forge-std/Script.sol";
 import "../src/WordleV2.sol";
 
-contract DeployOnChainWordle is Script {
+contract DeployWordleV2 is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address authorityAddress = vm.envAddress("AUTHORITY_ADDRESS");
@@ -14,9 +14,9 @@ contract DeployOnChainWordle is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        OnChainWordle onChainWordle = new OnChainWordle(authorityAddress);
+        WordleV2 wordleV2 = new WordleV2(authorityAddress);
 
-        console.log("OnChainWordle deployed to:", address(onChainWordle));
+        console.log("WordleV2 deployed to:", address(wordleV2));
         console.log("Authority address set to:", authorityAddress);
 
         vm.stopBroadcast();
