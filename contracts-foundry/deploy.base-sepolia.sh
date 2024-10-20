@@ -1,1 +1,1 @@
-forge script script/DeployOnChainWordle.s.sol:DeployOnChainWordle --rpc-url base_sepolia --broadcast --verify -vvvv
+forge script script/DeployWordleV2.s.sol:DeployWordleV2 --rpc-url base_sepolia --broadcast --verify -vvvv
