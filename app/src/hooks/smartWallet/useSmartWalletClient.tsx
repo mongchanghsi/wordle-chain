@@ -7,6 +7,7 @@ import { toSimpleSmartAccount } from "permissionless/accounts";
 import { createPimlicoClient } from "permissionless/clients/pimlico";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { useSetActiveWallet } from "@privy-io/wagmi";
+import ENVIRONMENT from "@/configuration/environment";
 
 export function useSmartWalletClient() {
   const { authenticated, ready } = usePrivy();
@@ -49,7 +50,7 @@ export function useSmartWalletClient() {
       const chain = wagmiWalletClient?.chain;
       if (!chain) throw new Error("Chain not found");
 
-      const pimlicoUrl = `https://api.pimlico.io/v2/${chain.id}/rpc?apikey=pim_As77M6yp9fi7YKpymfBs84`;
+      const pimlicoUrl = `https://api.pimlico.io/v2/${chain.id}/rpc?apikey=${ENVIRONMENT.PIMLICO_API_KEY}`;
 
       const pimlicoClient = createPimlicoClient({
         transport: http(pimlicoUrl),

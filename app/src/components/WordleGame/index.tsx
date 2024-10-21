@@ -15,18 +15,20 @@ import { wordleV2Abi, wordleV2Address } from "@/generated";
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 5;
 
-type GameStatus = "playing" | "won" | "lost";
+export type GameStatus = "playing" | "won" | "lost" | "none";
 
 interface WordleGameProps {
   resetGame: () => void;
   onSubmit: (submitFn: () => void) => void;
   onInputValidityChange: (isValid: boolean) => void;
+  handleGameStatusChange: (status: GameStatus) => void;
 }
 
 const WordleGame: React.FC<WordleGameProps> = ({
   resetGame,
   onSubmit,
   onInputValidityChange,
+  handleGameStatusChange,
 }) => {
   const { address } = useAccount();
   const { smartAccountClient } = useSmartWalletClient();
@@ -36,7 +38,7 @@ const WordleGame: React.FC<WordleGameProps> = ({
   const [currentGuess, setCurrentGuess] = useState<string[]>(
     Array(WORD_LENGTH).fill("")
   );
-  const [gameStatus, setGameStatus] = useState<GameStatus>("playing");
+  const [gameStatus, setGameStatus] = useState<GameStatus>("none");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const initGame = useCallback(async () => {
@@ -44,11 +46,10 @@ const WordleGame: React.FC<WordleGameProps> = ({
       const word = getWord();
       const { wordHash, letterCodes, salt, signature } =
         await generateWordHash(word);
+      if (signature === "0x") return;
 
       // Setup the aa transaction
-      if (!address || !smartAccountClient) {
-        return;
-      }
+      if (!address || !smartAccountClient) return;
 
       const userOperation = await smartAccountClient.sendUserOperation({
         calls: [
@@ -139,8 +140,10 @@ const WordleGame: React.FC<WordleGameProps> = ({
 
         if (guess === targetWord) {
           setGameStatus("won");
+          handleGameStatusChange("won");
         } else if (newGuesses.length === MAX_GUESSES) {
           setGameStatus("lost");
+          handleGameStatusChange("lost");
         } else {
           inputRefs.current[0]?.focus();
         }
@@ -216,13 +219,12 @@ const WordleGame: React.FC<WordleGameProps> = ({
           </GuessRow>
         ))}
       </GuessesContainer>
-      {gameStatus !== "playing" && (
-        <GameMessage>
-          {gameStatus === "won"
-            ? "Congratulations! You guessed the word!"
-            : `Game over! The word was ${targetWord.toUpperCase()}`}
-        </GameMessage>
-      )}
+      <GameMessage>
+        {gameStatus === "won" && "Congratulations! You guessed the word!"}
+        {gameStatus === "lost" &&
+          `Game over! The word was ${targetWord.toUpperCase()}`}
+        {gameStatus === "none" && `Click on New Word to get started!`}
+      </GameMessage>
     </GameContainer>
   );
 };
