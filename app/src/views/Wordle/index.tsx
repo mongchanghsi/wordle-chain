@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef } from "react";
-import WordleGame from "../../components/WordleGame";
+import WordleGame, { GameStatus } from "../../components/WordleGame";
 import styled from "styled-components";
 import { FiRefreshCw, FiSend } from "react-icons/fi";
 import Button from "@/components/Shared/Button";
@@ -35,15 +35,17 @@ const GameActionContainer = styled.div`
 const Wordle = () => {
   const [gameKey, setGameKey] = useState(0);
   const [isInputValid, setIsInputValid] = useState(false);
-  const [gameStatus, setGameStatus] = useState<"playing" | "won" | "lost">(
-    "playing"
-  );
+  const [gameStatus, setGameStatus] = useState<GameStatus>("none");
   const submitGuessRef = useRef<() => void>(() => {});
 
   const restartGame = useCallback(() => {
     setGameKey((prevKey) => prevKey + 1);
     setGameStatus("playing");
   }, []);
+
+  const handleGameStatusChange = (status: GameStatus) => {
+    setGameStatus(status);
+  };
 
   const handleSubmit = useCallback(() => {
     if (isInputValid) {
@@ -65,6 +67,7 @@ const Wordle = () => {
             submitGuessRef.current = submitFn;
           }}
           onInputValidityChange={handleInputValidityChange}
+          handleGameStatusChange={handleGameStatusChange}
         />
       </GameContent>
       <GameActionContainer>
@@ -72,6 +75,7 @@ const Wordle = () => {
           onClick={restartGame}
           variant="secondary"
           label="New Word"
+          disabled={gameStatus === "playing"}
           startIcon={<FiRefreshCw />}
         ></Button>
         <Button
