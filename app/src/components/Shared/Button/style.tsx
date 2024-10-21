@@ -30,7 +30,7 @@ export const ButtonContainer = styled.button<{
   align-items: center;
   justify-content: center;
   gap: ${({ theme }) => theme.spacing.small};
-  padding: ${({ theme }) => `${theme.spacing.small} ${theme.spacing.medium}`};
+  padding: ${({ theme }) => `${theme.spacing.medium} ${theme.spacing.large}`};
   background-color: ${({ theme, variant, disabled }) =>
     disabled
       ? theme.colors.secondary
@@ -41,7 +41,7 @@ export const ButtonContainer = styled.button<{
   border: 2px solid
     ${({ theme, variant }) =>
       variant === "primary" ? theme.colors.primary : theme.colors.text};
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: ${({ theme }) => theme.fontSizes.medium};
   font-weight: bold;
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};

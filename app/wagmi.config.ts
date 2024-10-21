@@ -1,205 +1,233 @@
-import { defineConfig } from '@wagmi/cli'
-import { actions } from '@wagmi/cli/plugins'
+import { defineConfig } from "@wagmi/cli";
+import { actions } from "@wagmi/cli/plugins";
 
 export default defineConfig({
-  out: 'src/generated.ts',
+  out: "src/generated.ts",
   contracts: [
     {
-      name: 'WordleV2',
+      name: "WordleV2",
       abi: [
         {
-          "type": "constructor",
-          "inputs": [
+          inputs: [
             {
-              "name": "_authorityAddress",
-              "type": "address",
-              "internalType": "address"
-            }
-          ],
-          "stateMutability": "nonpayable"
-        },
-        {
-          "type": "function",
-          "name": "MAX_ATTEMPTS",
-          "inputs": [],
-          "outputs": [{ "name": "", "type": "uint8", "internalType": "uint8" }],
-          "stateMutability": "view"
-        },
-        {
-          "type": "function",
-          "name": "WORD_LENGTH",
-          "inputs": [],
-          "outputs": [{ "name": "", "type": "uint8", "internalType": "uint8" }],
-          "stateMutability": "view"
-        },
-        {
-          "type": "function",
-          "name": "authorityAddress",
-          "inputs": [],
-          "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
-          "stateMutability": "view"
-        },
-        {
-          "type": "function",
-          "name": "games",
-          "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
-          "outputs": [
-            { "name": "wordHash", "type": "bytes32", "internalType": "bytes32" },
-            { "name": "attemptsLeft", "type": "uint8", "internalType": "uint8" },
-            { "name": "completed", "type": "bool", "internalType": "bool" },
-            { "name": "salt", "type": "bytes32", "internalType": "bytes32" }
-          ],
-          "stateMutability": "view"
-        },
-        {
-          "type": "function",
-          "name": "getGame",
-          "inputs": [
-            { "name": "player", "type": "address", "internalType": "address" }
-          ],
-          "outputs": [
-            {
-              "name": "",
-              "type": "tuple",
-              "internalType": "struct OnChainWordle.Game",
-              "components": [
-                {
-                  "name": "wordHash",
-                  "type": "bytes32",
-                  "internalType": "bytes32"
-                },
-                {
-                  "name": "attemptsLeft",
-                  "type": "uint8",
-                  "internalType": "uint8"
-                },
-                { "name": "completed", "type": "bool", "internalType": "bool" },
-                {
-                  "name": "letterCodes",
-                  "type": "bytes32[5]",
-                  "internalType": "bytes32[5]"
-                },
-                { "name": "salt", "type": "bytes32", "internalType": "bytes32" }
-              ]
-            }
-          ],
-          "stateMutability": "view"
-        },
-        {
-          "type": "function",
-          "name": "makeGuess",
-          "inputs": [
-            { "name": "_guess", "type": "string", "internalType": "string" }
-          ],
-          "outputs": [],
-          "stateMutability": "nonpayable"
-        },
-        {
-          "type": "function",
-          "name": "startNewGame",
-          "inputs": [
-            { "name": "_wordHash", "type": "bytes32", "internalType": "bytes32" },
-            {
-              "name": "_letterCodes",
-              "type": "bytes32[5]",
-              "internalType": "bytes32[5]"
+              internalType: "address",
+              name: "_authorityAddress",
+              type: "address",
             },
-            { "name": "_salt", "type": "bytes32", "internalType": "bytes32" },
-            { "name": "_signature", "type": "bytes", "internalType": "bytes" }
           ],
-          "outputs": [],
-          "stateMutability": "nonpayable"
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        { inputs: [], name: "ECDSAInvalidSignature", type: "error" },
+        {
+          inputs: [
+            { internalType: "uint256", name: "length", type: "uint256" },
+          ],
+          name: "ECDSAInvalidSignatureLength",
+          type: "error",
         },
         {
-          "type": "function",
-          "name": "verifyWord",
-          "inputs": [
-            { "name": "_word", "type": "string", "internalType": "string" },
-            { "name": "_hash", "type": "bytes32", "internalType": "bytes32" }
-          ],
-          "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
-          "stateMutability": "pure"
+          inputs: [{ internalType: "bytes32", name: "s", type: "bytes32" }],
+          name: "ECDSAInvalidSignatureS",
+          type: "error",
         },
         {
-          "type": "event",
-          "name": "GameLost",
-          "inputs": [
+          anonymous: false,
+          inputs: [
             {
-              "name": "player",
-              "type": "address",
-              "indexed": false,
-              "internalType": "address"
-            }
+              indexed: false,
+              internalType: "address",
+              name: "player",
+              type: "address",
+            },
           ],
-          "anonymous": false
+          name: "GameLost",
+          type: "event",
         },
         {
-          "type": "event",
-          "name": "GameStarted",
-          "inputs": [
+          anonymous: false,
+          inputs: [
             {
-              "name": "player",
-              "type": "address",
-              "indexed": false,
-              "internalType": "address"
-            }
+              indexed: false,
+              internalType: "address",
+              name: "player",
+              type: "address",
+            },
           ],
-          "anonymous": false
+          name: "GameStarted",
+          type: "event",
         },
         {
-          "type": "event",
-          "name": "GameWon",
-          "inputs": [
+          anonymous: false,
+          inputs: [
             {
-              "name": "player",
-              "type": "address",
-              "indexed": false,
-              "internalType": "address"
-            }
+              indexed: false,
+              internalType: "address",
+              name: "player",
+              type: "address",
+            },
           ],
-          "anonymous": false
+          name: "GameWon",
+          type: "event",
         },
         {
-          "type": "event",
-          "name": "GuessResult",
-          "inputs": [
+          anonymous: false,
+          inputs: [
             {
-              "name": "player",
-              "type": "address",
-              "indexed": false,
-              "internalType": "address"
+              indexed: false,
+              internalType: "address",
+              name: "player",
+              type: "address",
             },
             {
-              "name": "guess",
-              "type": "string",
-              "indexed": false,
-              "internalType": "string"
+              indexed: false,
+              internalType: "string",
+              name: "guess",
+              type: "string",
             },
             {
-              "name": "result",
-              "type": "string",
-              "indexed": false,
-              "internalType": "string"
-            }
+              indexed: false,
+              internalType: "string",
+              name: "result",
+              type: "string",
+            },
           ],
-          "anonymous": false
-        },
-        { "type": "error", "name": "ECDSAInvalidSignature", "inputs": [] },
-        {
-          "type": "error",
-          "name": "ECDSAInvalidSignatureLength",
-          "inputs": [
-            { "name": "length", "type": "uint256", "internalType": "uint256" }
-          ]
+          name: "GuessResult",
+          type: "event",
         },
         {
-          "type": "error",
-          "name": "ECDSAInvalidSignatureS",
-          "inputs": [{ "name": "s", "type": "bytes32", "internalType": "bytes32" }]
-        }
+          inputs: [],
+          name: "MAX_ATTEMPTS",
+          outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "WORD_LENGTH",
+          outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "authorityAddress",
+          outputs: [{ internalType: "address", name: "", type: "address" }],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [{ internalType: "address", name: "", type: "address" }],
+          name: "games",
+          outputs: [
+            { internalType: "bytes32", name: "wordHash", type: "bytes32" },
+            { internalType: "uint8", name: "attemptsLeft", type: "uint8" },
+            { internalType: "bool", name: "completed", type: "bool" },
+            { internalType: "bytes32", name: "salt", type: "bytes32" },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            { internalType: "address", name: "player", type: "address" },
+          ],
+          name: "getGame",
+          outputs: [
+            {
+              components: [
+                { internalType: "bytes32", name: "wordHash", type: "bytes32" },
+                { internalType: "uint8", name: "attemptsLeft", type: "uint8" },
+                { internalType: "bool", name: "completed", type: "bool" },
+                {
+                  internalType: "bytes32[5]",
+                  name: "letterCodes",
+                  type: "bytes32[5]",
+                },
+                { internalType: "bytes32", name: "salt", type: "bytes32" },
+              ],
+              internalType: "struct WordleV2.Game",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [{ internalType: "uint256", name: "index", type: "uint256" }],
+          name: "getLeaderboardEntry",
+          outputs: [
+            { internalType: "address", name: "player", type: "address" },
+            { internalType: "uint256", name: "score", type: "uint256" },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getLeaderboardSize",
+          outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [{ internalType: "string", name: "_guess", type: "string" }],
+          name: "makeGuess",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [{ internalType: "address", name: "", type: "address" }],
+          name: "scores",
+          outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            { internalType: "bytes32", name: "_wordHash", type: "bytes32" },
+            {
+              internalType: "bytes32[5]",
+              name: "_letterCodes",
+              type: "bytes32[5]",
+            },
+            { internalType: "bytes32", name: "_salt", type: "bytes32" },
+            { internalType: "bytes", name: "_signature", type: "bytes" },
+          ],
+          name: "startNewGame",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+          name: "topFive",
+          outputs: [
+            { internalType: "address", name: "player", type: "address" },
+            {
+              internalType: "uint256",
+              name: "correctGuesses",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            { internalType: "string", name: "_word", type: "string" },
+            { internalType: "bytes32", name: "_hash", type: "bytes32" },
+          ],
+          name: "verifyWord",
+          outputs: [{ internalType: "bool", name: "", type: "bool" }],
+          stateMutability: "pure",
+          type: "function",
+        },
       ],
-      address: '0x1050ceaa756863fa53a84f4c47fea3ac9f3f7761',
+      address: "0x4D3dF191FC0C0416A0FCFB47Def5faf45479cd95",
     },
   ],
   plugins: [actions()],
-})
+});
