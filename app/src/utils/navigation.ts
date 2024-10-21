@@ -1,6 +1,6 @@
-import BookSvg from "@/assets/icons/book.svg";
+// import BookSvg from "@/assets/icons/book.svg";
 import GameSVG from "@/assets/icons/game.svg";
-import HistorySVG from "@/assets/icons/history.svg";
+// import HistorySVG from "@/assets/icons/history.svg";
 import ChartSVG from "@/assets/icons/chart.svg";
 
 type INavigation = {

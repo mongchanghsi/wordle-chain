@@ -50,7 +50,9 @@ const Leaderboard = () => {
           };
         })
       );
-    } catch (error) {}
+    } catch (error) {
+      console.log("Leaderboard | Error - ", error);
+    }
 
     setLoading(false);
   };
@@ -69,7 +71,7 @@ const Leaderboard = () => {
         <Spinner />
       ) : (
         data.map((_record) => (
-          <LeaderboardRow>
+          <LeaderboardRow key={_record.address}>
             <LeaderboardRowItem>
               {shortenAddress(_record.address)}
             </LeaderboardRowItem>

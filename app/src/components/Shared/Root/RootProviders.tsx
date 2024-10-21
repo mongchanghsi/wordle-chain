@@ -1,4 +1,4 @@
-import { SDKProvider, mockTelegramEnv, isTMA } from "@telegram-apps/sdk-react";
+import { SDKProvider, isTMA } from "@telegram-apps/sdk-react";
 import { PropsWithChildren, useEffect, useState } from "react";
 import RootLayout from "./RootLayout";
 import RootBinding from "./RootBinding";
