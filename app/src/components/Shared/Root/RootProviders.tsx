@@ -7,7 +7,7 @@ import { darkTheme } from "@/theme";
 import CustomPrivyProvider from "@/context/PrivyProvider";
 
 const RootProviders = ({ children }: PropsWithChildren) => {
-  const debug = true;
+  const debug = false;
   const [isInTelegramWebApp, setIsInTelegramWebApp] = useState<boolean | null>(
     null
   );
@@ -99,16 +99,14 @@ const RootProviders = ({ children }: PropsWithChildren) => {
       <SDKProvider acceptCustomStyles debug={debug}>
         <ThemeProvider theme={darkTheme}>
           <RootLayout>
-            <RootBinding>
-              {isInTelegramWebApp ? (
-                children
-              ) : (
-                <div>
-                  This app is designed to run within Telegram. Please open it in
-                  the Telegram app.
-                </div>
-              )}
-            </RootBinding>
+            {isInTelegramWebApp ? (
+              <RootBinding>children</RootBinding>
+            ) : (
+              <div>
+                This app is designed to run within Telegram. Please open it in
+                the Telegram app.
+              </div>
+            )}
           </RootLayout>
         </ThemeProvider>
       </SDKProvider>
