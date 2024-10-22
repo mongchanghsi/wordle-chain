@@ -100,7 +100,7 @@ const RootProviders = ({ children }: PropsWithChildren) => {
         <ThemeProvider theme={darkTheme}>
           <RootLayout>
             {isInTelegramWebApp ? (
-              <RootBinding>children</RootBinding>
+              <RootBinding>{children}</RootBinding>
             ) : (
               <div>
                 This app is designed to run within Telegram. Please open it in
